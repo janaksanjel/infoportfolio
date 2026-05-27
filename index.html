@@ -1,581 +1,1031 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Janak Sanjel — Full Stack Developer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Janak Sanjel — Full Stack Developer</title>
 
-    :root {
-      --paper: #f5efe0;
-      --paper-dark: #e8dcc8;
-      --ink: #1a1209;
-      --ink-mid: #3d2f1a;
-      --ink-light: #6b5740;
-      --accent: #8b1a1a;
-      --accent-gold: #c49a2a;
-      --rule: #c49a2a;
-      --shadow: rgba(30, 18, 5, 0.18);
-    }
+    <!-- Favicon: SVG monogram "JS" embedded as data URI -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b1a1a'/%3E%3Cstop offset='100%25' stop-color='%23c49a2a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='10' fill='%231a1209'/%3E%3Crect x='2' y='2' width='60' height='60' rx='9' fill='none' stroke='url(%23g)' stroke-width='2.5'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-size='28' font-weight='bold' fill='url(%23g)' font-style='italic'%3EJS%3C/text%3E%3Ccircle cx='48' cy='16' r='4' fill='%23c49a2a' opacity='0.7'/%3E%3C/svg%3E" />
 
-    html { font-size: 16px; }
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
 
-    body {
-      background: #2a1f12;
-      background-image: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 98px,
-        rgba(0,0,0,0.07) 98px,
-        rgba(0,0,0,0.07) 100px
-      );
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 40px 20px;
-      font-family: 'EB Garamond', Georgia, serif;
-    }
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    /* ── Book wrapper ─────────────────────────────── */
-    .book {
-      width: 100%;
-      max-width: 820px;
-      background: var(--paper);
-      box-shadow:
-        -6px 0 18px rgba(0,0,0,0.4),
-        6px 0 18px rgba(0,0,0,0.25),
-        0 8px 40px rgba(0,0,0,0.5),
-        inset 4px 0 10px rgba(0,0,0,0.08);
-      position: relative;
-      border-radius: 2px 4px 4px 2px;
-    }
+        :root {
+            --paper: #f5efe0;
+            --paper-dark: #e8dcc8;
+            --paper-darker: #d4c5a9;
+            --ink: #1a1209;
+            --ink-mid: #3d2f1a;
+            --ink-light: #6b5740;
+            --accent: #8b1a1a;
+            --accent-gold: #c49a2a;
+            --accent-gold-dim: #a07d1e;
+            --rule: #c49a2a;
+            --shadow: rgba(20, 10, 3, 0.55);
+            --leather-dark: #1e140a;
+            --leather-mid: #2a1c0e;
+            --wood: #3b2816;
+            --wood-light: #5a3d22;
+        }
 
-    /* Spine shadow */
-    .book::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 28px;
-      background: linear-gradient(to right, #b8a890, var(--paper-dark) 60%, transparent);
-      border-radius: 2px 0 0 2px;
-      z-index: 2;
-      pointer-events: none;
-    }
+        html {
+            font-size: 16px;
+        }
 
-    /* Paper texture overlay */
-    .book::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      border-radius: 2px 4px 4px 2px;
-      z-index: 1;
-    }
+        /* ── Deep Library Background ──────────────────── */
+        body {
+            background:
+                /* Vignette overlay */
+                radial-gradient(ellipse at center, rgba(25, 14, 5, 0.35) 0%, rgba(8, 3, 1, 0.92) 85%, #050201 100%),
+                /* Wood grain texture */
+                repeating-linear-gradient(2deg,
+                    transparent,
+                    transparent 3px,
+                    rgba(60, 28, 10, 0.5) 3px,
+                    rgba(60, 28, 10, 0.5) 4px),
+                repeating-linear-gradient(92deg,
+                    transparent,
+                    transparent 7px,
+                    rgba(45, 20, 8, 0.35) 7px,
+                    rgba(45, 20, 8, 0.35) 8px),
+                /* Rich leather/wood base */
+                linear-gradient(175deg, #1a0d04 0%, #2a1808 30%, #1e0f05 60%, #140902 100%);
+            background-color: #0f0702;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 50px 20px 60px;
+            font-family: 'EB Garamond', Georgia, serif;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-    .page {
-      padding: 60px 70px 60px 80px;
-      position: relative;
-      z-index: 3;
-    }
+        /* Subtle floating dust particles */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(1px 1px at 15% 20%, rgba(220, 190, 130, 0.25), transparent),
+                radial-gradient(1px 1px at 28% 55%, rgba(220, 190, 130, 0.2), transparent),
+                radial-gradient(1.5px 1.5px at 62% 30%, rgba(220, 190, 130, 0.3), transparent),
+                radial-gradient(1px 1px at 75% 70%, rgba(220, 190, 130, 0.2), transparent),
+                radial-gradient(1.5px 1.5px at 40% 78%, rgba(220, 190, 130, 0.25), transparent),
+                radial-gradient(1px 1px at 85% 15%, rgba(220, 190, 130, 0.18), transparent),
+                radial-gradient(1px 1px at 10% 65%, rgba(220, 190, 130, 0.22), transparent),
+                radial-gradient(1.5px 1.5px at 55% 45%, rgba(220, 190, 130, 0.28), transparent),
+                radial-gradient(1px 1px at 92% 50%, rgba(220, 190, 130, 0.2), transparent),
+                radial-gradient(1px 1px at 33% 12%, rgba(220, 190, 130, 0.15), transparent);
+            animation: dustFloat 18s ease-in-out infinite;
+        }
 
-    /* ── Ruled lines ──────────────────────────────── */
-    .ruled {
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent,
-        transparent 31px,
-        rgba(180, 155, 100, 0.2) 31px,
-        rgba(180, 155, 100, 0.2) 32px
-      );
-    }
+        @keyframes dustFloat {
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: translateY(0);
+            }
+            25% {
+                opacity: 0.9;
+                transform: translateY(-4px);
+            }
+            50% {
+                opacity: 0.55;
+                transform: translateY(-1px);
+            }
+            75% {
+                opacity: 0.85;
+                transform: translateY(-6px);
+            }
+        }
 
-    /* ── Page numbers ─────────────────────────────── */
-    .page-num {
-      position: absolute;
-      bottom: 22px;
-      right: 70px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      color: var(--ink-light);
-      letter-spacing: 0.12em;
-    }
+        /* ── Ambient shelf shadows behind the book ───── */
+        .shelf-shadows {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 960px;
+            height: 100%;
+        }
 
-    /* ── Ornamental rules ─────────────────────────── */
-    .ornament {
-      text-align: center;
-      color: var(--accent-gold);
-      font-size: 1.1rem;
-      letter-spacing: 0.5em;
-      margin: 8px 0;
-      user-select: none;
-    }
+        .shelf-shadows::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: 30px;
+            width: 160px;
+            height: 88%;
+            background: linear-gradient(to right,
+                    rgba(15, 6, 2, 0.85) 0%,
+                    rgba(25, 12, 4, 0.55) 40%,
+                    transparent 100%);
+            border-radius: 3px 0 0 3px;
+            filter: blur(2px);
+        }
 
-    .rule-line {
-      border: none;
-      border-top: 1.5px solid var(--rule);
-      opacity: 0.45;
-      margin: 6px 0;
-    }
+        .shelf-shadows::after {
+            content: '';
+            position: absolute;
+            top: 28px;
+            right: 30px;
+            width: 160px;
+            height: 88%;
+            background: linear-gradient(to left,
+                    rgba(15, 6, 2, 0.85) 0%,
+                    rgba(25, 12, 4, 0.55) 40%,
+                    transparent 100%);
+            border-radius: 0 3px 3px 0;
+            filter: blur(2px);
+        }
 
-    .rule-thick {
-      border: none;
-      border-top: 2.5px double var(--rule);
-      opacity: 0.5;
-      margin: 4px 0;
-    }
+        /* ── Book wrapper ─────────────────────────────── */
+        .book {
+            width: 100%;
+            max-width: 840px;
+            background: var(--paper);
+            box-shadow:
+                /* Deep shadow beneath */
+                -14px 10px 35px rgba(0, 0, 0, 0.7),
+                10px 8px 30px rgba(0, 0, 0, 0.6),
+                0 16px 55px rgba(0, 0, 0, 0.65),
+                /* Page edge shadow */
+                inset 3px 0 16px rgba(0, 0, 0, 0.12),
+                inset -2px 0 8px rgba(0, 0, 0, 0.06),
+                /* Gold glint on edges */
+                0 0 0 1px rgba(180, 140, 70, 0.3);
+            position: relative;
+            border-radius: 3px 5px 5px 3px;
+            z-index: 2;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
 
-    /* ── Header / Title page feel ─────────────────── */
-    .book-header {
-      text-align: center;
-      padding-bottom: 28px;
-      border-bottom: none;
-    }
+        .book:hover {
+            transform: translateY(-3px) rotateX(1deg);
+            box-shadow:
+                -16px 14px 40px rgba(0, 0, 0, 0.75),
+                12px 10px 35px rgba(0, 0, 0, 0.65),
+                0 20px 60px rgba(0, 0, 0, 0.7),
+                inset 3px 0 16px rgba(0, 0, 0, 0.12),
+                inset -2px 0 8px rgba(0, 0, 0, 0.06),
+                0 0 0 1px rgba(180, 140, 70, 0.3);
+        }
 
-    .book-header .chapter-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.35em;
-      color: var(--ink-light);
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
+        /* Leather spine */
+        .book::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 32px;
+            background: linear-gradient(to right,
+                    #3d1e08 0%,
+                    #5a2f12 18%,
+                    #3d1e08 38%,
+                    #6b3a1a 55%,
+                    #4a250d 72%,
+                    #3a1b07 100%);
+            border-radius: 3px 0 0 3px;
+            z-index: 4;
+            pointer-events: none;
+            box-shadow: inset -2px 0 6px rgba(0, 0, 0, 0.5), inset 1px 0 2px rgba(200, 150, 80, 0.2);
+            border-right: 1px solid rgba(180, 130, 60, 0.4);
+        }
 
-    .book-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 3.4rem;
-      font-weight: 900;
-      color: var(--ink);
-      line-height: 1.08;
-      letter-spacing: -0.01em;
-    }
+        /* Spine raised bands */
+        .book::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 18%;
+            width: 32px;
+            height: 4px;
+            background: rgba(180, 130, 60, 0.5);
+            z-index: 5;
+            pointer-events: none;
+            border-radius: 1px;
+            box-shadow:
+                0 80px 0 rgba(180, 130, 60, 0.5),
+                0 160px 0 rgba(180, 130, 60, 0.5),
+                0 240px 0 rgba(180, 130, 60, 0.5),
+                0 320px 0 rgba(180, 130, 60, 0.5);
+        }
 
-    .book-header h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
+        /* Page edges (top, bottom, right) */
+        .page-edge-top {
+            position: absolute;
+            top: -3px;
+            left: 32px;
+            right: 3px;
+            height: 6px;
+            background: linear-gradient(to bottom,
+                    #e6d9be 0%,
+                    #d4c5a4 40%,
+                    #c4b590 100%);
+            z-index: 5;
+            pointer-events: none;
+            border-radius: 1px 1px 0 0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
 
-    .book-header .subtitle {
-      font-family: 'EB Garamond', serif;
-      font-size: 1.15rem;
-      color: var(--ink-mid);
-      letter-spacing: 0.18em;
-      margin-top: 10px;
-      font-style: italic;
-    }
+        .page-edge-bottom {
+            position: absolute;
+            bottom: -3px;
+            left: 32px;
+            right: 3px;
+            height: 6px;
+            background: linear-gradient(to top,
+                    #e6d9be 0%,
+                    #d4c5a4 40%,
+                    #c4b590 100%);
+            z-index: 5;
+            pointer-events: none;
+            border-radius: 0 0 1px 1px;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.3);
+        }
 
-    .contact-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px 22px;
-      margin-top: 16px;
-      font-size: 0.82rem;
-      color: var(--ink-light);
-      font-family: 'EB Garamond', serif;
-    }
+        .page-edge-right {
+            position: absolute;
+            right: -2px;
+            top: 3px;
+            bottom: 3px;
+            width: 5px;
+            background: linear-gradient(to left,
+                    #e6d9be 0%,
+                    #d4c5a4 40%,
+                    #c4b590 100%);
+            z-index: 5;
+            pointer-events: none;
+            border-radius: 0 2px 2px 0;
+            box-shadow: -1px 0 2px rgba(0, 0, 0, 0.25);
+        }
 
-    .contact-row a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .contact-row a:hover { text-decoration: underline; }
+        /* Paper texture overlay */
+        .texture-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+            pointer-events: none;
+            border-radius: 3px 5px 5px 3px;
+            z-index: 1;
+        }
 
-    /* ── Section headings ─────────────────────────── */
-    .section {
-      margin-top: 30px;
-    }
+        .page {
+            padding: 60px 70px 60px 80px;
+            position: relative;
+            z-index: 3;
+        }
 
-    .section-head {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--ink);
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 4px;
-    }
+        /* ── Ruled lines ──────────────────────────────── */
+        .ruled {
+            background-image: repeating-linear-gradient(to bottom,
+                    transparent,
+                    transparent 31px,
+                    rgba(180, 155, 100, 0.18) 31px,
+                    rgba(180, 155, 100, 0.18) 32px);
+        }
 
-    /* ── Profile / drop cap ───────────────────────── */
-    .profile-text {
-      font-size: 1.02rem;
-      color: var(--ink-mid);
-      line-height: 1.85;
-      text-align: justify;
-      hyphens: auto;
-    }
+        /* ── Page numbers ─────────────────────────────── */
+        .page-num {
+            position: absolute;
+            bottom: 22px;
+            right: 70px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            color: var(--ink-light);
+            letter-spacing: 0.12em;
+            z-index: 6;
+        }
 
-    .profile-text::first-letter {
-      font-family: 'Playfair Display', serif;
-      font-size: 3.8rem;
-      font-weight: 900;
-      float: left;
-      line-height: 0.78;
-      margin: 6px 8px -4px 0;
-      color: var(--accent);
-    }
+        .page-num-left {
+            position: absolute;
+            bottom: 22px;
+            left: 90px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            color: var(--ink-light);
+            letter-spacing: 0.12em;
+            z-index: 6;
+        }
 
-    /* ── Two-column layout ────────────────────────── */
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 36px;
-    }
+        /* ── Ornamental rules ─────────────────────────── */
+        .ornament {
+            text-align: center;
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+            letter-spacing: 0.5em;
+            margin: 8px 0;
+            user-select: none;
+            text-shadow: 0 1px 1px rgba(180, 140, 60, 0.3);
+        }
 
-    /* ── Experience entry ─────────────────────────── */
-    .exp-entry {
-      margin-bottom: 14px;
-    }
+        .ornament-sm {
+            font-size: 0.75rem;
+            letter-spacing: 0.35em;
+            margin: 4px 0;
+        }
 
-    .exp-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--ink);
-      font-style: italic;
-    }
+        .rule-line {
+            border: none;
+            border-top: 1.5px solid var(--rule);
+            opacity: 0.4;
+            margin: 6px 0;
+        }
 
-    .exp-company {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.18em;
-      color: var(--accent);
-      margin-top: 1px;
-    }
+        .rule-thick {
+            border: none;
+            border-top: 2.5px double var(--rule);
+            opacity: 0.5;
+            margin: 4px 0;
+        }
 
-    .exp-date {
-      font-size: 0.8rem;
-      color: var(--ink-light);
-      font-style: italic;
-      margin-bottom: 6px;
-    }
+        .rule-dotted {
+            border: none;
+            border-top: 1px dotted var(--rule);
+            opacity: 0.35;
+            margin: 6px 0;
+        }
 
-    .exp-bullets {
-      list-style: none;
-      padding: 0;
-    }
+        /* ── Header / Title page feel ─────────────────── */
+        .book-header {
+            text-align: center;
+            padding-bottom: 28px;
+            border-bottom: none;
+        }
 
-    .exp-bullets li {
-      font-size: 0.9rem;
-      color: var(--ink-mid);
-      line-height: 1.75;
-      padding-left: 16px;
-      position: relative;
-      text-align: justify;
-    }
+        .book-header .chapter-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.38em;
+            color: var(--ink-light);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
 
-    .exp-bullets li::before {
-      content: '◆';
-      position: absolute;
-      left: 0;
-      font-size: 0.45rem;
-      top: 8px;
-      color: var(--accent-gold);
-    }
+        .book-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--ink);
+            line-height: 1.08;
+            letter-spacing: -0.01em;
+            text-shadow: 1px 1px 0 rgba(180, 140, 60, 0.15);
+        }
 
-    /* ── Projects grid ────────────────────────────── */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 28px;
-    }
+        .book-header h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
 
-    .project-card {
-      border-left: 2px solid var(--accent-gold);
-      padding-left: 12px;
-    }
+        .book-header .subtitle {
+            font-family: 'EB Garamond', serif;
+            font-size: 1.15rem;
+            color: var(--ink-mid);
+            letter-spacing: 0.2em;
+            margin-top: 10px;
+            font-style: italic;
+        }
 
-    .project-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 0.96rem;
-      font-weight: 700;
-      color: var(--ink);
-      font-style: italic;
-    }
+        .contact-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 22px;
+            margin-top: 16px;
+            font-size: 0.82rem;
+            color: var(--ink-light);
+            font-family: 'EB Garamond', serif;
+        }
 
-    .project-stack {
-      font-family: 'Cinzel', serif;
-      font-size: 0.58rem;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      margin: 2px 0 4px;
-      text-transform: uppercase;
-    }
+        .contact-row span {
+            white-space: nowrap;
+        }
 
-    .project-desc {
-      font-size: 0.82rem;
-      color: var(--ink-mid);
-      line-height: 1.65;
-    }
+        .contact-row a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
 
-    /* ── Skills ───────────────────────────────────── */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px 10px;
-      text-align: center;
-    }
+        .contact-row a:hover {
+            color: var(--accent-gold);
+            text-decoration: underline;
+        }
 
-    .skill-group h4 {
-      font-family: 'Cinzel', serif;
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
+        /* ── Section headings ─────────────────────────── */
+        .section {
+            margin-top: 30px;
+        }
 
-    .skill-group p {
-      font-size: 0.8rem;
-      color: var(--ink-mid);
-      line-height: 1.65;
-    }
+        .section-head {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 4px;
+        }
 
-    /* ── Education ────────────────────────────────── */
-    .edu-entry {
-      margin-bottom: 10px;
-    }
+        /* ── Profile / drop cap ───────────────────────── */
+        .profile-text {
+            font-size: 1.02rem;
+            color: var(--ink-mid);
+            line-height: 1.85;
+            text-align: justify;
+            hyphens: auto;
+        }
 
-    .edu-degree {
-      font-family: 'Playfair Display', serif;
-      font-size: 0.97rem;
-      font-weight: 700;
-      font-style: italic;
-      color: var(--ink);
-    }
+        .profile-text::first-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            float: left;
+            line-height: 0.75;
+            margin: 8px 10px -2px 0;
+            color: var(--accent);
+            text-shadow: 1px 2px 2px rgba(139, 26, 26, 0.2);
+        }
 
-    .edu-school {
-      font-size: 0.82rem;
-      color: var(--ink-mid);
-    }
+        /* ── Two-column layout ────────────────────────── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 36px;
+        }
 
-    .edu-detail {
-      font-size: 0.78rem;
-      color: var(--ink-light);
-      font-style: italic;
-    }
+        /* ── Experience entry ─────────────────────────── */
+        .exp-entry {
+            margin-bottom: 14px;
+        }
 
-    /* ── Footer colophon ──────────────────────────── */
-    .colophon {
-      text-align: center;
-      margin-top: 28px;
-      padding-top: 14px;
-    }
+        .exp-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--ink);
+            font-style: italic;
+        }
 
-    .colophon p {
-      font-family: 'Cinzel', serif;
-      font-size: 0.62rem;
-      letter-spacing: 0.25em;
-      color: var(--ink-light);
-      margin-top: 8px;
-    }
+        .exp-company {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            color: var(--accent);
+            margin-top: 1px;
+        }
 
-    /* ── Animations ───────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+        .exp-date {
+            font-size: 0.8rem;
+            color: var(--ink-light);
+            font-style: italic;
+            margin-bottom: 6px;
+        }
 
-    .book { animation: fadeUp 0.9s ease both; }
+        .exp-bullets {
+            list-style: none;
+            padding: 0;
+        }
 
-    /* ── Responsive ───────────────────────────────── */
-    @media (max-width: 640px) {
-      .page { padding: 40px 30px 40px 44px; }
-      .book-header h1 { font-size: 2.4rem; }
-      .two-col, .projects-grid, .skills-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+        .exp-bullets li {
+            font-size: 0.9rem;
+            color: var(--ink-mid);
+            line-height: 1.75;
+            padding-left: 18px;
+            position: relative;
+            text-align: justify;
+            margin-bottom: 3px;
+        }
+
+        .exp-bullets li::before {
+            content: '◆';
+            position: absolute;
+            left: 0;
+            font-size: 0.4rem;
+            top: 9px;
+            color: var(--accent-gold);
+        }
+
+        /* ── Projects grid ────────────────────────────── */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 28px;
+        }
+
+        .project-card {
+            border-left: 2px solid var(--accent-gold);
+            padding-left: 14px;
+            transition: border-color 0.25s;
+            position: relative;
+        }
+
+        .project-card:hover {
+            border-left-color: var(--accent);
+        }
+
+        .project-card::after {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            width: 4px;
+            height: 0;
+            background: var(--accent-gold);
+            opacity: 0.35;
+            transition: height 0.4s ease;
+            border-radius: 1px;
+        }
+
+        .project-card:hover::after {
+            height: 100%;
+        }
+
+        .project-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.97rem;
+            font-weight: 700;
+            color: var(--ink);
+            font-style: italic;
+        }
+
+        .project-stack {
+            font-family: 'Cinzel', serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.13em;
+            color: var(--accent);
+            margin: 2px 0 4px;
+            text-transform: uppercase;
+        }
+
+        .project-desc {
+            font-size: 0.82rem;
+            color: var(--ink-mid);
+            line-height: 1.65;
+        }
+
+        /* ── Skills ───────────────────────────────────── */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px 10px;
+            text-align: center;
+        }
+
+        .skill-group h4 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.22em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .skill-group p {
+            font-size: 0.8rem;
+            color: var(--ink-mid);
+            line-height: 1.7;
+        }
+
+        /* ── Education ────────────────────────────────── */
+        .edu-entry {
+            margin-bottom: 10px;
+        }
+
+        .edu-degree {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.97rem;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--ink);
+        }
+
+        .edu-school {
+            font-size: 0.82rem;
+            color: var(--ink-mid);
+        }
+
+        .edu-detail {
+            font-size: 0.78rem;
+            color: var(--ink-light);
+            font-style: italic;
+        }
+
+        /* ── Footer colophon ──────────────────────────── */
+        .colophon {
+            text-align: center;
+            margin-top: 28px;
+            padding-top: 14px;
+        }
+
+        .colophon p {
+            font-family: 'Cinzel', serif;
+            font-size: 0.62rem;
+            letter-spacing: 0.28em;
+            color: var(--ink-light);
+            margin-top: 8px;
+        }
+
+        /* ── Bookmark ribbon ──────────────────────────── */
+        .bookmark-ribbon {
+            position: absolute;
+            top: -8px;
+            right: 38px;
+            width: 22px;
+            height: 90px;
+            background: linear-gradient(180deg, #8b1a1a 0%, #6b1010 40%, #5a0c0c 100%);
+            z-index: 10;
+            pointer-events: none;
+            border-radius: 2px 2px 0 0;
+            box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.5);
+            clip-path: polygon(0 0, 100% 0, 100% 88%, 60% 100%, 20% 88%, 0 88%);
+        }
+
+        .bookmark-ribbon::after {
+            content: '';
+            position: absolute;
+            bottom: 12%;
+            left: 2px;
+            right: 2px;
+            height: 3px;
+            background: rgba(200, 150, 60, 0.5);
+            border-radius: 1px;
+        }
+
+        /* ── Wax seal mark on cover feel ──────────────── */
+        .seal-mark {
+            position: absolute;
+            top: 22px;
+            right: 55px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #8b1a1a 0%, #4a0808 70%, #2a0404 100%);
+            z-index: 11;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55), inset 0 1px 2px rgba(255, 200, 150, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.55rem;
+            color: rgba(220, 180, 120, 0.8);
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* ── Animations ───────────────────────────────── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes gentleGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(200, 150, 60, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 18px rgba(200, 150, 60, 0.3);
+            }
+        }
+
+        .book {
+            animation: fadeUp 1s ease both, gentleGlow 6s ease-in-out infinite;
+        }
+
+        /* ── Responsive ───────────────────────────────── */
+        @media (max-width: 768px) {
+            .page {
+                padding: 40px 35px 40px 50px;
+            }
+            .book-header h1 {
+                font-size: 2.5rem;
+            }
+            .two-col,
+            .projects-grid,
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            .book::before {
+                width: 24px;
+            }
+            .book::after {
+                width: 24px;
+            }
+            .page-edge-top,
+            .page-edge-bottom,
+            .page-edge-right {
+                display: none;
+            }
+            .bookmark-ribbon {
+                right: 24px;
+                width: 16px;
+                height: 65px;
+            }
+            .seal-mark {
+                right: 36px;
+                width: 28px;
+                height: 28px;
+                font-size: 0.4rem;
+            }
+            .page-num {
+                right: 38px;
+                bottom: 16px;
+            }
+            .page-num-left {
+                left: 55px;
+                bottom: 16px;
+            }
+            .shelf-shadows::before,
+            .shelf-shadows::after {
+                width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page {
+                padding: 30px 22px 30px 36px;
+            }
+            .book-header h1 {
+                font-size: 2rem;
+            }
+            .book-header .chapter-label {
+                font-size: 0.6rem;
+                letter-spacing: 0.25em;
+            }
+            .contact-row {
+                gap: 6px 12px;
+                font-size: 0.72rem;
+            }
+            .section-head {
+                font-size: 0.9rem;
+                letter-spacing: 0.16em;
+            }
+            .profile-text {
+                font-size: 0.9rem;
+            }
+            .profile-text::first-letter {
+                font-size: 3rem;
+            }
+            .book::before {
+                width: 18px;
+            }
+            .book::after {
+                width: 18px;
+                top: 20%;
+            }
+            .bookmark-ribbon {
+                right: 16px;
+                width: 12px;
+                height: 50px;
+                top: -5px;
+            }
+            .seal-mark {
+                right: 24px;
+                top: 14px;
+                width: 22px;
+                height: 22px;
+                font-size: 0.35rem;
+            }
+            .shelf-shadows::before,
+            .shelf-shadows::after {
+                width: 40px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="book">
-  <div class="page ruled">
-    <span class="page-num">— i —</span>
 
-    <!-- ── HEADER ──────────────────────────────── -->
-    <header class="book-header">
-      <p class="chapter-label">Curriculum Vitæ</p>
-      <hr class="rule-thick" />
-      <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
-      <h1><em>Janak</em> Sanjel</h1>
-      <p class="subtitle">Full Stack Developer</p>
-      <div class="ornament">— ✧ —</div>
-      <hr class="rule-line" />
-      <div class="contact-row">
-        <span>📧 <a href="mailto:janaksanjel12@gmail.com">janaksanjel12@gmail.com</a></span>
-        <span>📞 +977 984 074 8285</span>
-        <span>📍 Godawari-11, Lalitpur, Nepal</span>
-        <span>🔗 <a href="https://github.com/janaksanjel" target="_blank">github.com/janaksanjel</a></span>
-        <span>🌐 <a href="https://janaksanjel.com.np" target="_blank">janaksanjel.com.np</a></span>
-      </div>
-    </header>
+    <!-- Shelf shadow illusions behind the book -->
+    <div class="shelf-shadows"></div>
 
-    <!-- ── PROFILE ─────────────────────────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Foreword</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-      <p class="profile-text" style="margin-top:12px;">
-        A dedicated Full Stack Developer with hands-on experience building production-ready web applications across government, recruitment, and hospitality sectors. Completed a Bachelor of Computer Application with a CGPA of 3.19 and currently working at NIRC, Kathmandu, where multiple client-facing systems have been shipped using ReactJS, Django, Java and MySQL. Writing clean, maintainable code, taking ownership of features end-to-end, and thriving in collaborative team environments.
-      </p>
-    </section>
+    <!-- The Book -->
+    <div class="book">
+        <!-- Page edge details -->
+        <div class="page-edge-top"></div>
+        <div class="page-edge-bottom"></div>
+        <div class="page-edge-right"></div>
 
-    <!-- ── EXPERIENCE ──────────────────────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Chapter I &nbsp;·&nbsp; Professional Experience</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-      <div style="margin-top:14px;" class="exp-entry">
-        <div class="exp-title">Full Stack Developer</div>
-        <div class="exp-company">NIRC — National Incubation &amp; Research Center, Kathmandu</div>
-        <div class="exp-date">December 2024 – Present</div>
-        <ul class="exp-bullets">
-          <li>Designed and delivered full-stack features for multiple live client projects, from database schema to responsive UI.</li>
-          <li>Worked directly with clients to translate requirements into technical solutions, reducing feedback cycles.</li>
-          <li>Maintained clean REST API contracts between Django backends and ReactJS frontends across 4 active products.</li>
-          <li>Contributed to a Grails/Java-based municipal government platform serving real users in local government offices.</li>
-        </ul>
-        <p style="font-size:0.76rem; color:var(--ink-light); font-style:italic; margin-top:6px;">
-          Stack: ReactJS · Django · Python · Java · Grails · MySQL · Node.js
-        </p>
-      </div>
-    </section>
+        <!-- Bookmark ribbon -->
+        <div class="bookmark-ribbon"></div>
 
-    <!-- ── PROJECTS ─────────────────────────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Chapter II &nbsp;·&nbsp; Selected Works</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-      <div class="projects-grid" style="margin-top:16px;">
+        <!-- Wax seal mark -->
+        <div class="seal-mark">JS</div>
 
-        <div class="project-card">
-          <div class="project-title">Training Management System</div>
-          <div class="project-stack">ReactJS · Django · MySQL</div>
-          <p class="project-desc">Complete institute management platform handling course scheduling, student enrolment, attendance and progress reporting. Designed DB schema and led frontend development.</p>
-        </div>
+        <!-- Texture overlay -->
+        <div class="texture-overlay"></div>
 
-        <div class="project-card">
-          <div class="project-title">GWP – Palika Software</div>
-          <div class="project-stack">Java · Grails · HTML · CSS · MySQL</div>
-          <p class="project-desc">Digital operations suite for local government offices, enabling municipalities to manage citizen services, records and reporting in one unified system.</p>
-        </div>
+        <div class="page ruled">
+            <span class="page-num">— i —</span>
+            <span class="page-num-left">— folio —</span>
 
-        <div class="project-card">
-          <div class="project-title">Rakmina – Recruitment Platform</div>
-          <div class="project-stack">Django · Next.js · MySQL</div>
-          <p class="project-desc">Full-featured staffing portal for a Lithuania-based agency with applicant tracking, job listings and employer dashboards supporting 500+ successful placements.</p>
-        </div>
+            <!-- ── HEADER ──────────────────────────────── -->
+            <header class="book-header">
+                <p class="chapter-label">Curriculum Vitæ</p>
+                <hr class="rule-thick" />
+                <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+                <h1><em>Janak</em> Sanjel</h1>
+                <p class="subtitle">Full Stack Developer</p>
+                <div class="ornament ornament-sm">— ✧ —</div>
+                <hr class="rule-line" />
+                <div class="contact-row">
+                    <span>📧 <a href="mailto:janaksanjel12@gmail.com">janaksanjel12@gmail.com</a></span>
+                    <span>📞 +977 984 074 8285</span>
+                    <span>📍 Godawari-11, Lalitpur, Nepal</span>
+                    <span>🔗 <a href="https://github.com/janaksanjel" target="_blank">github.com/janaksanjel</a></span>
+                    <span>🌐 <a href="https://janaksanjel.com.np" target="_blank">janaksanjel.com.np</a></span>
+                </div>
+            </header>
 
-        <div class="project-card">
-          <div class="project-title">Gym Management System</div>
-          <div class="project-stack">ReactJS · Django · MySQL</div>
-          <p class="project-desc">All-in-one gym platform covering member registration, subscription billing, attendance check-in and staff management with a clean dashboard interface.</p>
-        </div>
+            <!-- ── PROFILE ─────────────────────────────── -->
+            <section class="section">
+                <hr class="rule-thick" />
+                <div class="ornament ornament-sm">✦</div>
+                <h2 class="section-head">Foreword</h2>
+                <div class="ornament ornament-sm">✦</div>
+                <hr class="rule-line" />
+                <p class="profile-text" style="margin-top:12px;">
+                    A dedicated Full Stack Developer with hands-on experience building production-ready web applications across government, recruitment, and hospitality sectors. Completed a Bachelor of Computer Application with a CGPA of 3.19 and currently working at NIRC, Kathmandu, where multiple client-facing systems have been shipped using ReactJS, Django, Java and MySQL. Writing clean, maintainable code, taking ownership of features end-to-end, and thriving in collaborative team environments.
+                </p>
+            </section>
 
-        <div class="project-card">
-          <div class="project-title">CRM – Kiran Restaurant &amp; Dealership</div>
-          <div class="project-stack">ReactJS · Django · Python · MySQL</div>
-          <p class="project-desc">Multi-vertical CRM covering customer records, follow-ups and sales pipelines for both a restaurant and a vehicle dealership under one roof.</p>
-        </div>
+            <!-- ── EXPERIENCE ──────────────────────────── -->
+            <section class="section">
+                <hr class="rule-thick" />
+                <div class="ornament ornament-sm">✦</div>
+                <h2 class="section-head">Chapter I &nbsp;·&nbsp; Professional Experience</h2>
+                <div class="ornament ornament-sm">✦</div>
+                <hr class="rule-line" />
+                <div style="margin-top:14px;" class="exp-entry">
+                    <div class="exp-title">Full Stack Developer</div>
+                    <div class="exp-company">NIRC — National Incubation &amp; Research Center, Kathmandu</div>
+                    <div class="exp-date">December 2024 – Present</div>
+                    <ul class="exp-bullets">
+                        <li>Designed and delivered full-stack features for multiple live client projects, from database schema to responsive UI.</li>
+                        <li>Worked directly with clients to translate requirements into technical solutions, reducing feedback cycles.</li>
+                        <li>Maintained clean REST API contracts between Django backends and ReactJS frontends across 4 active products.</li>
+                        <li>Contributed to a Grails/Java-based municipal government platform serving real users in local government offices.</li>
+                    </ul>
+                    <p style="font-size:0.76rem; color:var(--ink-light); font-style:italic; margin-top:6px;">
+                        Stack: ReactJS · Django · Python · Java · Grails · MySQL · Node.js
+                    </p>
+                </div>
+            </section>
 
-        <div class="project-card">
-          <div class="project-title">OrderUP – Food Delivery App</div>
-          <div class="project-stack">ReactJS · Node.js</div>
-          <p class="project-desc">Online ordering system with dynamic menus, real-time cart and checkout flow, designed for small restaurants moving to digital ordering.</p>
-        </div>
+            <!-- ── PROJECTS ─────────────────────────────── -->
+            <section class="section">
+                <hr class="rule-thick" />
+                <div class="ornament ornament-sm">✦</div>
+                <h2 class="section-head">Chapter II &nbsp;·&nbsp; Selected Works</h2>
+                <div class="ornament ornament-sm">✦</div>
+                <hr class="rule-line" />
+                <div class="projects-grid" style="margin-top:16px;">
 
-        <div class="project-card">
-          <div class="project-title">Electronic Voting System</div>
-          <div class="project-stack">HTML · CSS · JavaScript</div>
-          <p class="project-desc">Secure, browser-based e-voting application for campus student elections with candidate registration, ballot casting and live result tallying.</p>
-        </div>
+                    <div class="project-card">
+                        <div class="project-title">Training Management System</div>
+                        <div class="project-stack">ReactJS · Django · MySQL</div>
+                        <p class="project-desc">Complete institute management platform handling course scheduling, student enrolment, attendance and progress reporting. Designed DB schema and led frontend development.</p>
+                    </div>
 
-        <div class="project-card">
-          <div class="project-title">E-Signature App</div>
-          <div class="project-stack">HTML · CSS · JavaScript</div>
-          <p class="project-desc">Lightweight digital signature tool enabling users to draw, type or upload signatures and embed them into documents — all without any server dependency.</p>
-        </div>
+                    <div class="project-card">
+                        <div class="project-title">GWP – Palika Software</div>
+                        <div class="project-stack">Java · Grails · HTML · CSS · MySQL</div>
+                        <p class="project-desc">Digital operations suite for local government offices, enabling municipalities to manage citizen services, records and reporting in one unified system.</p>
+                    </div>
 
-      </div>
-    </section>
+                    <div class="project-card">
+                        <div class="project-title">Rakmina – Recruitment Platform</div>
+                        <div class="project-stack">Django · Next.js · MySQL</div>
+                        <p class="project-desc">Full-featured staffing portal for a Lithuania-based agency with applicant tracking, job listings and employer dashboards supporting 500+ successful placements.</p>
+                    </div>
 
-    <!-- ── SKILLS + EDUCATION (two-col) ─────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Chapter III &nbsp;·&nbsp; Craft &amp; Learning</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
+                    <div class="project-card">
+                        <div class="project-title">Gym Management System</div>
+                        <div class="project-stack">ReactJS · Django · MySQL</div>
+                        <p class="project-desc">All-in-one gym platform covering member registration, subscription billing, attendance check-in and staff management with a clean dashboard interface.</p>
+                    </div>
 
-      <div class="two-col" style="margin-top:18px;">
+                    <div class="project-card">
+                        <div class="project-title">CRM – Kiran Restaurant &amp; Dealership</div>
+                        <div class="project-stack">ReactJS · Django · Python · MySQL</div>
+                        <p class="project-desc">Multi-vertical CRM covering customer records, follow-ups and sales pipelines for both a restaurant and a vehicle dealership under one roof.</p>
+                    </div>
 
-        <!-- Skills -->
-        <div>
-          <p style="font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase; margin-bottom:12px;">Technical Skills</p>
-          <div class="skills-grid" style="grid-template-columns:1fr 1fr; text-align:left;">
-            <div class="skill-group">
-              <h4>Frontend</h4>
-              <p>ReactJS<br/>Next.js<br/>JavaScript ES6+<br/>HTML5 &amp; CSS3</p>
+                    <div class="project-card">
+                        <div class="project-title">OrderUP – Food Delivery App</div>
+                        <div class="project-stack">ReactJS · Node.js</div>
+                        <p class="project-desc">Online ordering system with dynamic menus, real-time cart and checkout flow, designed for small restaurants moving to digital ordering.</p>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-title">Electronic Voting System</div>
+                        <div class="project-stack">HTML · CSS · JavaScript</div>
+                        <p class="project-desc">Secure, browser-based e-voting application for campus student elections with candidate registration, ballot casting and live result tallying.</p>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-title">E-Signature App</div>
+                        <div class="project-stack">HTML · CSS · JavaScript</div>
+                        <p class="project-desc">Lightweight digital signature tool enabling users to draw, type or upload signatures and embed them into documents — all without any server dependency.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ── SKILLS + EDUCATION (two-col) ─────────── -->
+            <section class="section">
+                <hr class="rule-thick" />
+                <div class="ornament ornament-sm">✦</div>
+                <h2 class="section-head">Chapter III &nbsp;·&nbsp; Craft &amp; Learning</h2>
+                <div class="ornament ornament-sm">✦</div>
+                <hr class="rule-line" />
+
+                <div class="two-col" style="margin-top:18px;">
+
+                    <!-- Skills -->
+                    <div>
+                        <p style="font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.22em; color:var(--accent); text-transform:uppercase; margin-bottom:12px;">Technical Skills</p>
+                        <div class="skills-grid" style="grid-template-columns:1fr 1fr; text-align:left;">
+                            <div class="skill-group">
+                                <h4>Frontend</h4>
+                                <p>ReactJS<br />Next.js<br />JavaScript ES6+<br />HTML5 &amp; CSS3</p>
+                            </div>
+                            <div class="skill-group">
+                                <h4>Backend</h4>
+                                <p>Django (Python)<br />Java · Grails<br />Node.js<br />REST APIs</p>
+                            </div>
+                            <div class="skill-group" style="margin-top:12px;">
+                                <h4>Database</h4>
+                                <p>MySQL<br />Database Design</p>
+                            </div>
+                            <div class="skill-group" style="margin-top:12px;">
+                                <h4>Tools</h4>
+                                <p>Git &amp; GitHub<br />Agile Workflow<br />Responsive Design</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education -->
+                    <div style="border-left: 1px solid rgba(196,154,42,0.35); padding-left:24px;">
+                        <p style="font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.22em; color:var(--accent); text-transform:uppercase; margin-bottom:12px;">Education</p>
+
+                        <div class="edu-entry">
+                            <div class="edu-degree">Bachelor of Computer Application</div>
+                            <div class="edu-school">Jana Bhawana Campus, Chapagaun</div>
+                            <div class="edu-detail">Completed 2025 · CGPA 3.19</div>
+                        </div>
+                        <hr class="rule-dotted" style="margin:10px 0;" />
+                        <div class="edu-entry">
+                            <div class="edu-degree">+2 Science</div>
+                            <div class="edu-school">Advance Academy College</div>
+                            <div class="edu-detail">Passed 2077 BS · GPA 2.97</div>
+                        </div>
+                        <hr class="rule-dotted" style="margin:10px 0;" />
+                        <div class="edu-entry">
+                            <div class="edu-degree">School Leaving Certificate</div>
+                            <div class="edu-school">Bidhyadhishwari Secondary School</div>
+                            <div class="edu-detail">Passed 2073 BS · GPA 3.15</div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ── COLOPHON / FOOTER ───────────────────── -->
+            <div class="colophon">
+                <hr class="rule-thick" />
+                <div class="ornament">✦ &nbsp;✦ &nbsp;✦</div>
+                <p>PRINTED &amp; BOUND BY JANAK SANJEL · LALITPUR, NEPAL · MMXXV</p>
+                <p style="margin-top:4px; color:var(--ink-light);">janaksanjel.com.np</p>
             </div>
-            <div class="skill-group">
-              <h4>Backend</h4>
-              <p>Django (Python)<br/>Java · Grails<br/>Node.js<br/>REST APIs</p>
-            </div>
-            <div class="skill-group" style="margin-top:12px;">
-              <h4>Database</h4>
-              <p>MySQL<br/>Database Design</p>
-            </div>
-            <div class="skill-group" style="margin-top:12px;">
-              <h4>Tools</h4>
-              <p>Git &amp; GitHub<br/>Agile Workflow<br/>Responsive Design</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- Education -->
-        <div style="border-left: 1px solid rgba(196,154,42,0.35); padding-left:24px;">
-          <p style="font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase; margin-bottom:12px;">Education</p>
+        </div><!-- .page -->
+    </div><!-- .book -->
 
-          <div class="edu-entry">
-            <div class="edu-degree">Bachelor of Computer Application</div>
-            <div class="edu-school">Jana Bhawana Campus, Chapagaun</div>
-            <div class="edu-detail">Completed 2025 · CGPA 3.19</div>
-          </div>
-          <hr class="rule-line" style="margin:10px 0;" />
-          <div class="edu-entry">
-            <div class="edu-degree">+2 Science</div>
-            <div class="edu-school">Advance Academy College</div>
-            <div class="edu-detail">Passed 2077 BS · GPA 2.97</div>
-          </div>
-          <hr class="rule-line" style="margin:10px 0;" />
-          <div class="edu-entry">
-            <div class="edu-degree">School Leaving Certificate</div>
-            <div class="edu-school">Bidhyadhishwari Secondary School</div>
-            <div class="edu-detail">Passed 2073 BS · GPA 3.15</div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── COLOPHON / FOOTER ───────────────────── -->
-    <div class="colophon">
-      <hr class="rule-thick" />
-      <div class="ornament">✦ &nbsp;✦ &nbsp;✦</div>
-      <p>PRINTED &amp; BOUND BY JANAK SANJEL · LALITPUR, NEPAL · MMXXV</p>
-      <p style="margin-top:4px; color:var(--ink-light);">janaksanjel.com.np</p>
-    </div>
-
-  </div><!-- .page -->
-</div><!-- .book -->
 </body>
 </html>
