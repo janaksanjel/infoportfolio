@@ -1,581 +1,800 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Janak Sanjel — Full Stack Developer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Janak Sanjel — Full Stack Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f7f0e3;--paper-mid:#ede3ce;--paper-dark:#d6c9b0;
+  --ink:#160f05;--ink-2:#2e2010;--ink-3:#5c4228;--ink-4:#8b6545;
+  --gold:#b8922a;--gold-light:#d4a83c;--red:#7a1515;--red-mid:#9b2020;
+  --spine-w:32px;--flip-dur:900ms;
+}
+html{font-size:15px}
+body{
+  background:#1a1008;
+  background-image:radial-gradient(ellipse 60% 80% at 50% 50%,#2d1e0a 0%,#0e0804 100%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:48px 16px 80px;font-family:'EB Garamond',Georgia,serif;
+  overflow-x:hidden;
+}
 
-    :root {
-      --paper: #f5efe0;
-      --paper-dark: #e8dcc8;
-      --ink: #1a1209;
-      --ink-mid: #3d2f1a;
-      --ink-light: #6b5740;
-      --accent: #8b1a1a;
-      --accent-gold: #c49a2a;
-      --rule: #c49a2a;
-      --shadow: rgba(30, 18, 5, 0.18);
-    }
+/* ── Ambient glow ── */
+.book-glow{
+  width:min(860px,100%);height:30px;
+  background:radial-gradient(ellipse,rgba(180,130,40,0.25) 0%,transparent 70%);
+  margin-top:-4px;
+}
 
-    html { font-size: 16px; }
+/* ══ BOOK SCENE ══ */
+.book-scene{
+  width:min(860px,100%);perspective:2400px;
+  position:relative;
+}
 
-    body {
-      background: #2a1f12;
-      background-image: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 98px,
-        rgba(0,0,0,0.07) 98px,
-        rgba(0,0,0,0.07) 100px
-      );
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 40px 20px;
-      font-family: 'EB Garamond', Georgia, serif;
-    }
+/* ── Page nav arrows ── */
+.nav-btn{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(184,146,42,0.18);border:1.5px solid rgba(184,146,42,0.45);
+  color:rgba(247,240,227,0.8);font-size:1.3rem;
+  cursor:pointer;z-index:100;transition:background .2s,transform .15s;
+  display:flex;align-items:center;justify-content:center;
+  user-select:none;
+}
+.nav-btn:hover{background:rgba(184,146,42,0.32);transform:translateY(-50%) scale(1.08)}
+.nav-btn:active{transform:translateY(-50%) scale(0.95)}
+.nav-prev{left:-52px}
+.nav-next{right:-52px}
+.nav-btn.hidden{opacity:0;pointer-events:none}
 
-    /* ── Book wrapper ─────────────────────────────── */
-    .book {
-      width: 100%;
-      max-width: 820px;
-      background: var(--paper);
-      box-shadow:
-        -6px 0 18px rgba(0,0,0,0.4),
-        6px 0 18px rgba(0,0,0,0.25),
-        0 8px 40px rgba(0,0,0,0.5),
-        inset 4px 0 10px rgba(0,0,0,0.08);
-      position: relative;
-      border-radius: 2px 4px 4px 2px;
-    }
+/* Page indicator */
+.page-indicator{
+  display:flex;gap:10px;justify-content:center;margin-top:16px;
+}
+.pip{
+  width:24px;height:3px;border-radius:2px;
+  background:rgba(184,146,42,0.3);transition:background .3s,width .3s;cursor:pointer;
+}
+.pip.active{background:rgba(184,146,42,0.9);width:36px;}
 
-    /* Spine shadow */
-    .book::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 28px;
-      background: linear-gradient(to right, #b8a890, var(--paper-dark) 60%, transparent);
-      border-radius: 2px 0 0 2px;
-      z-index: 2;
-      pointer-events: none;
-    }
+/* ══ BOOK CONTAINER ══ */
+.book{
+  width:100%;display:flex;position:relative;
+  transform-origin:left center;
+  transform-style:preserve-3d;
+  transition:transform var(--flip-dur) cubic-bezier(.4,0,.2,1),
+             box-shadow var(--flip-dur) cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 24px rgba(0,0,0,.6),8px 4px 32px rgba(0,0,0,.4),0 12px 60px rgba(0,0,0,.7);
+  border-radius:3px 5px 5px 3px;
+  animation:rise 1s cubic-bezier(.16,1,.3,1) both;
+  will-change:transform;
+}
 
-    /* Paper texture overlay */
-    .book::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      border-radius: 2px 4px 4px 2px;
-      z-index: 1;
-    }
+@keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 
-    .page {
-      padding: 60px 70px 60px 80px;
-      position: relative;
-      z-index: 3;
-    }
+/* flip states */
+.book.flip-forward{
+  animation:flipFwd var(--flip-dur) cubic-bezier(.4,0,.2,1) both;
+}
+.book.flip-back{
+  animation:flipBck var(--flip-dur) cubic-bezier(.4,0,.2,1) both;
+}
 
-    /* ── Ruled lines ──────────────────────────────── */
-    .ruled {
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent,
-        transparent 31px,
-        rgba(180, 155, 100, 0.2) 31px,
-        rgba(180, 155, 100, 0.2) 32px
-      );
-    }
+@keyframes flipFwd{
+  0%  {transform:rotateY(0deg) translateZ(0);}
+  30% {transform:rotateY(-25deg) translateZ(30px);}
+  60% {transform:rotateY(-8deg) translateZ(20px);}
+  100%{transform:rotateY(0deg) translateZ(0);}
+}
+@keyframes flipBck{
+  0%  {transform:rotateY(0deg) translateZ(0);}
+  30% {transform:rotateY(25deg) translateZ(30px);}
+  60% {transform:rotateY(8deg) translateZ(20px);}
+  100%{transform:rotateY(0deg) translateZ(0);}
+}
 
-    /* ── Page numbers ─────────────────────────────── */
-    .page-num {
-      position: absolute;
-      bottom: 22px;
-      right: 70px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.72rem;
-      color: var(--ink-light);
-      letter-spacing: 0.12em;
-    }
+/* Page turn overlay (the folding leaf) */
+.flip-leaf{
+  position:absolute;top:0;right:0;
+  width:0;height:100%;
+  background:var(--paper-mid);
+  transform-origin:left center;
+  transform:scaleX(0);
+  z-index:50;
+  pointer-events:none;
+  border-radius:0 5px 5px 0;
+  box-shadow:inset -6px 0 18px rgba(0,0,0,.15);
+  transition:none;
+}
+.flip-leaf.animating{
+  animation:leafFlip var(--flip-dur) cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes leafFlip{
+  0%  {transform:scaleX(0);opacity:1;}
+  35% {transform:scaleX(1);opacity:.95;}
+  65% {transform:scaleX(1);opacity:.95;}
+  100%{transform:scaleX(0);opacity:0;}
+}
 
-    /* ── Ornamental rules ─────────────────────────── */
-    .ornament {
-      text-align: center;
-      color: var(--accent-gold);
-      font-size: 1.1rem;
-      letter-spacing: 0.5em;
-      margin: 8px 0;
-      user-select: none;
-    }
+/* ── Spine ── */
+.spine{
+  width:var(--spine-w);flex-shrink:0;
+  background:linear-gradient(to right,#7a5c34 0%,#a07840 35%,#c49050 55%,#a07840 75%,#7a5c34 100%);
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;overflow:hidden;
+  border-radius:3px 0 0 3px;
+}
+.spine::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.3) 0%,rgba(255,255,255,.08) 40%,rgba(0,0,0,.15) 100%)}
+.spine-text{writing-mode:vertical-rl;transform:rotate(180deg);font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.35em;color:rgba(255,240,200,.75);text-transform:uppercase;position:relative;z-index:1;padding:20px 0}
+.spine-ornament{color:rgba(212,168,60,.7);font-size:.9rem;position:relative;z-index:1;margin:12px 0;writing-mode:horizontal-tb}
 
-    .rule-line {
-      border: none;
-      border-top: 1.5px solid var(--rule);
-      opacity: 0.45;
-      margin: 6px 0;
-    }
+/* ── Gutter ── */
+.gutter{width:22px;flex-shrink:0;background:linear-gradient(to right,rgba(0,0,0,.18) 0%,rgba(0,0,0,.05) 60%,transparent 100%);position:relative}
+.gutter::after{content:'';position:absolute;top:0;bottom:0;right:0;width:1px;background:rgba(0,0,0,.06)}
 
-    .rule-thick {
-      border: none;
-      border-top: 2.5px double var(--rule);
-      opacity: 0.5;
-      margin: 4px 0;
-    }
+/* ── Page ── */
+.page{
+  flex:1;background:var(--paper);
+  padding:56px 64px 52px 44px;
+  position:relative;overflow:hidden;
+  border-radius:0 5px 5px 0;
+}
+.page::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+.page::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 27px,rgba(160,130,80,.13) 27px,rgba(160,130,80,.13) 28px);pointer-events:none;z-index:0}
+.page>*{position:relative;z-index:1}
 
-    /* ── Header / Title page feel ─────────────────── */
-    .book-header {
-      text-align: center;
-      padding-bottom: 28px;
-      border-bottom: none;
-    }
+/* Page curl */
+.page-curl{position:absolute;bottom:0;right:0;width:40px;height:40px;background:linear-gradient(225deg,var(--paper-dark) 45%,var(--paper-mid) 55%);clip-path:polygon(100% 0,100% 100%,0 100%);z-index:10;cursor:pointer;transition:width .2s,height .2s}
+.page-curl:hover{width:55px;height:55px}
+.page-curl::before{content:'';position:absolute;inset:0;background:linear-gradient(225deg,rgba(0,0,0,.12) 0%,transparent 60%)}
 
-    .book-header .chapter-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.68rem;
-      letter-spacing: 0.35em;
-      color: var(--ink-light);
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
+/* Folio */
+.folio{position:absolute;bottom:22px;right:80px;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;color:var(--ink-4)}
 
-    .book-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 3.4rem;
-      font-weight: 900;
-      color: var(--ink);
-      line-height: 1.08;
-      letter-spacing: -0.01em;
-    }
+/* Pages hidden/shown */
+.page-content{display:none}
+.page-content.active{display:block}
 
-    .book-header h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
+/* ══ SHARED TYPOGRAPHY ══ */
+.div-rule{border:none;border-top:1px solid var(--gold);opacity:.3;margin:3px 0}
+.div-rule.double{border-top:2.5px double var(--gold);opacity:.35}
+.div-ornament{font-size:.75rem;color:var(--gold);letter-spacing:.8em;padding-left:.8em;opacity:.8;display:inline-block;margin:2px 0}
+.div-wrap{text-align:center;margin:2px 0}
+.section{margin-top:22px}
+.section-title{text-align:center;font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.38em;text-transform:uppercase;color:var(--ink-3);margin:5px 0}
 
-    .book-header .subtitle {
-      font-family: 'EB Garamond', serif;
-      font-size: 1.15rem;
-      color: var(--ink-mid);
-      letter-spacing: 0.18em;
-      margin-top: 10px;
-      font-style: italic;
-    }
+/* ══ PAGE 1 ══ */
+.header{text-align:center;padding-bottom:20px}
+.header-label{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.5em;color:var(--ink-4);text-transform:uppercase;margin-bottom:16px}
+.header-name{font-family:'Cormorant Garamond',serif;font-size:4.2rem;font-weight:600;color:var(--ink);line-height:.95;letter-spacing:-.01em}
+.header-name span{font-style:italic;font-weight:300;color:var(--red)}
+.header-title{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.45em;color:var(--ink-3);text-transform:uppercase;margin-top:10px}
+.contacts{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px;margin-top:14px;font-size:.82rem;color:var(--ink-3)}
+.contacts a{color:var(--red-mid);text-decoration:none}.contacts a:hover{text-decoration:underline}
+.contact-item{display:flex;align-items:center;gap:5px}
+.c-dot{width:3px;height:3px;border-radius:50%;background:var(--gold);display:inline-block;opacity:.6}
+.profile{font-family:'EB Garamond',serif;font-size:1rem;line-height:1.9;color:var(--ink-2);text-align:justify;hyphens:auto}
+.profile::first-letter{font-family:'Playfair Display',serif;font-size:4.2rem;font-weight:900;float:left;line-height:.74;margin:8px 9px -4px -2px;color:var(--red)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 38px;margin-top:16px}
+.col-rule{border-left:1px solid rgba(160,130,80,.25);padding-left:28px}
+.exp{margin-bottom:12px}
+.exp-role{font-family:'Cormorant Garamond',serif;font-size:1.12rem;font-weight:600;font-style:italic;color:var(--ink);line-height:1.2}
+.exp-org{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.2em;color:var(--red);margin-top:2px;text-transform:uppercase}
+.exp-period{font-size:.8rem;color:var(--ink-4);font-style:italic;margin-bottom:8px;margin-top:1px}
+.bullets{list-style:none;padding:0}
+.bullets li{font-size:.88rem;color:var(--ink-2);line-height:1.8;padding-left:16px;position:relative;text-align:justify}
+.bullets li::before{content:'';position:absolute;left:3px;top:10px;width:5px;height:1px;background:var(--gold)}
+.stack-tag{font-size:.73rem;font-style:italic;color:var(--ink-4);margin-top:7px;border-top:1px solid rgba(160,130,80,.2);padding-top:5px}
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px;margin-top:14px}
+.proj{padding:10px 0 10px 14px;border-left:2px solid var(--gold);position:relative}
+.proj::after{content:'';position:absolute;left:-2px;top:0;height:6px;width:2px;background:var(--red)}
+.proj-name{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;font-style:italic;color:var(--ink);line-height:1.2}
+.proj-tech{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.15em;color:var(--gold);text-transform:uppercase;margin:3px 0 5px}
+.proj-desc{font-size:.8rem;color:var(--ink-3);line-height:1.65}
+.skill-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;margin-top:14px}
+.skill-cat{text-align:center}
+.skill-cat-name{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(160,130,80,.25)}
+.skill-cat-items{font-size:.8rem;color:var(--ink-3);line-height:1.75}
+.edu{margin-bottom:10px}.edu:last-child{margin-bottom:0}
+.edu-degree{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;font-style:italic;color:var(--ink)}
+.edu-school{font-size:.82rem;color:var(--ink-3);margin-top:1px}
+.edu-detail{font-size:.75rem;color:var(--ink-4);font-style:italic}
+.edu-divider{border:none;border-top:1px solid rgba(160,130,80,.18);margin:9px 0}
+.colophon{text-align:center;margin-top:24px;padding-top:12px}
+.colophon-text{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.3em;color:var(--ink-4);margin-top:8px;text-transform:uppercase}
 
-    .contact-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px 22px;
-      margin-top: 16px;
-      font-size: 0.82rem;
-      color: var(--ink-light);
-      font-family: 'EB Garamond', serif;
-    }
+/* ══ PAGE 2 — PAINT ══ */
+.p2-title{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;color:var(--ink);line-height:1}
+.p2-title span{font-style:italic;color:var(--red);font-weight:300}
+.p2-subtitle{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.42em;color:var(--ink-3);text-transform:uppercase;margin-top:8px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:10px 14px;background:rgba(160,130,80,.1);border:1px solid rgba(160,130,80,.25);border-radius:3px;margin-top:14px}
+.tool-group{display:flex;align-items:center;gap:8px;padding-right:14px;border-right:1px solid rgba(160,130,80,.25)}
+.tool-group:last-child{border-right:none;padding-right:0}
+.tool-label{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.25em;color:var(--ink-4);text-transform:uppercase;white-space:nowrap}
+.mode-btn{width:28px;height:28px;border:1.5px solid rgba(160,130,80,.4);border-radius:3px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-3);transition:background .15s,border-color .15s;padding:0}
+.mode-btn:hover{background:rgba(160,130,80,.15);border-color:var(--gold)}
+.mode-btn.active{background:rgba(160,130,80,.25);border-color:var(--red);color:var(--red)}
+.swatch-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.swatch{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;outline:none}
+.swatch:hover{transform:scale(1.15)}.swatch.active{border-color:var(--ink);transform:scale(1.12)}
+#custom-color{width:22px;height:22px;border:none;border-radius:50%;padding:0;cursor:pointer;background:none;overflow:hidden}
+#brush-size{-webkit-appearance:none;width:80px;height:4px;background:rgba(160,130,80,.3);border-radius:2px;outline:none}
+#brush-size::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--ink)}
+#brush-opacity{-webkit-appearance:none;width:70px;height:4px;background:rgba(160,130,80,.3);border-radius:2px;outline:none}
+#brush-opacity::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--ink)}
+.act-btn{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;padding:5px 10px;border:1.5px solid rgba(160,130,80,.45);border-radius:3px;background:transparent;color:var(--ink-3);cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.act-btn:hover{background:rgba(160,130,80,.15);border-color:var(--gold);color:var(--ink)}
+.act-btn.save{border-color:var(--red);color:var(--red)}.act-btn.save:hover{background:rgba(122,21,21,.1)}
+.canvas-wrap{margin-top:14px;position:relative;border:1.5px solid rgba(160,130,80,.4);border-radius:3px;overflow:hidden;cursor:crosshair;background:var(--paper);box-shadow:inset 0 2px 8px rgba(0,0,0,.08)}
+.canvas-wrap::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 27px,rgba(160,130,80,.1) 27px,rgba(160,130,80,.1) 28px);pointer-events:none;z-index:0}
+#draw-canvas{display:block;width:100%;position:relative;z-index:1}
+.status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:0 2px}
+.status-text{font-family:'EB Garamond',serif;font-size:.78rem;font-style:italic;color:var(--ink-4)}
 
-    .contact-row a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .contact-row a:hover { text-decoration: underline; }
+/* ── Sound toggle ── */
+.sound-btn{
+  position:fixed;top:18px;right:18px;
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(184,146,42,.15);border:1.5px solid rgba(184,146,42,.4);
+  color:rgba(247,240,227,.7);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;transition:background .2s;
+  font-family:sans-serif;
+}
+.sound-btn:hover{background:rgba(184,146,42,.28)}
 
-    /* ── Section headings ─────────────────────────── */
-    .section {
-      margin-top: 30px;
-    }
+/* ── Hint ── */
+.swipe-hint{
+  font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.3em;
+  color:rgba(184,146,42,.5);text-align:center;margin-top:12px;
+  text-transform:uppercase;animation:fadeHint 4s ease both;
+}
+@keyframes fadeHint{0%{opacity:0}20%{opacity:1}70%{opacity:1}100%{opacity:0}}
 
-    .section-head {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--ink);
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 4px;
-    }
-
-    /* ── Profile / drop cap ───────────────────────── */
-    .profile-text {
-      font-size: 1.02rem;
-      color: var(--ink-mid);
-      line-height: 1.85;
-      text-align: justify;
-      hyphens: auto;
-    }
-
-    .profile-text::first-letter {
-      font-family: 'Playfair Display', serif;
-      font-size: 3.8rem;
-      font-weight: 900;
-      float: left;
-      line-height: 0.78;
-      margin: 6px 8px -4px 0;
-      color: var(--accent);
-    }
-
-    /* ── Two-column layout ────────────────────────── */
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 36px;
-    }
-
-    /* ── Experience entry ─────────────────────────── */
-    .exp-entry {
-      margin-bottom: 14px;
-    }
-
-    .exp-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--ink);
-      font-style: italic;
-    }
-
-    .exp-company {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.18em;
-      color: var(--accent);
-      margin-top: 1px;
-    }
-
-    .exp-date {
-      font-size: 0.8rem;
-      color: var(--ink-light);
-      font-style: italic;
-      margin-bottom: 6px;
-    }
-
-    .exp-bullets {
-      list-style: none;
-      padding: 0;
-    }
-
-    .exp-bullets li {
-      font-size: 0.9rem;
-      color: var(--ink-mid);
-      line-height: 1.75;
-      padding-left: 16px;
-      position: relative;
-      text-align: justify;
-    }
-
-    .exp-bullets li::before {
-      content: '◆';
-      position: absolute;
-      left: 0;
-      font-size: 0.45rem;
-      top: 8px;
-      color: var(--accent-gold);
-    }
-
-    /* ── Projects grid ────────────────────────────── */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 28px;
-    }
-
-    .project-card {
-      border-left: 2px solid var(--accent-gold);
-      padding-left: 12px;
-    }
-
-    .project-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 0.96rem;
-      font-weight: 700;
-      color: var(--ink);
-      font-style: italic;
-    }
-
-    .project-stack {
-      font-family: 'Cinzel', serif;
-      font-size: 0.58rem;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      margin: 2px 0 4px;
-      text-transform: uppercase;
-    }
-
-    .project-desc {
-      font-size: 0.82rem;
-      color: var(--ink-mid);
-      line-height: 1.65;
-    }
-
-    /* ── Skills ───────────────────────────────────── */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px 10px;
-      text-align: center;
-    }
-
-    .skill-group h4 {
-      font-family: 'Cinzel', serif;
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .skill-group p {
-      font-size: 0.8rem;
-      color: var(--ink-mid);
-      line-height: 1.65;
-    }
-
-    /* ── Education ────────────────────────────────── */
-    .edu-entry {
-      margin-bottom: 10px;
-    }
-
-    .edu-degree {
-      font-family: 'Playfair Display', serif;
-      font-size: 0.97rem;
-      font-weight: 700;
-      font-style: italic;
-      color: var(--ink);
-    }
-
-    .edu-school {
-      font-size: 0.82rem;
-      color: var(--ink-mid);
-    }
-
-    .edu-detail {
-      font-size: 0.78rem;
-      color: var(--ink-light);
-      font-style: italic;
-    }
-
-    /* ── Footer colophon ──────────────────────────── */
-    .colophon {
-      text-align: center;
-      margin-top: 28px;
-      padding-top: 14px;
-    }
-
-    .colophon p {
-      font-family: 'Cinzel', serif;
-      font-size: 0.62rem;
-      letter-spacing: 0.25em;
-      color: var(--ink-light);
-      margin-top: 8px;
-    }
-
-    /* ── Animations ───────────────────────────────── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .book { animation: fadeUp 0.9s ease both; }
-
-    /* ── Responsive ───────────────────────────────── */
-    @media (max-width: 640px) {
-      .page { padding: 40px 30px 40px 44px; }
-      .book-header h1 { font-size: 2.4rem; }
-      .two-col, .projects-grid, .skills-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+/* ── Responsive ── */
+@media(max-width:680px){
+  :root{--spine-w:18px}
+  .page{padding:36px 24px 40px 20px}
+  .header-name{font-size:2.8rem}
+  .cols,.proj-grid,.skill-grid{grid-template-columns:1fr}
+  .col-rule{border-left:none;padding-left:0;margin-top:18px;padding-top:18px;border-top:1px solid rgba(160,130,80,.25)}
+  .p2-title{font-size:2rem}
+  .nav-prev{left:-42px}.nav-next{right:-42px}
+  #brush-size,#brush-opacity{width:50px}
+}
+</style>
 </head>
 <body>
-<div class="book">
-  <div class="page ruled">
-    <span class="page-num">— i —</span>
 
-    <!-- ── HEADER ──────────────────────────────── -->
-    <header class="book-header">
-      <p class="chapter-label">Curriculum Vitæ</p>
-      <hr class="rule-thick" />
-      <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
-      <h1><em>Janak</em> Sanjel</h1>
-      <p class="subtitle">Full Stack Developer</p>
-      <div class="ornament">— ✧ —</div>
-      <hr class="rule-line" />
-      <div class="contact-row">
-        <span>📧 <a href="mailto:janaksanjel12@gmail.com">janaksanjel12@gmail.com</a></span>
-        <span>📞 +977 984 074 8285</span>
-        <span>📍 Godawari-11, Lalitpur, Nepal</span>
-        <span>🔗 <a href="https://github.com/janaksanjel" target="_blank">github.com/janaksanjel</a></span>
-        <span>🌐 <a href="https://janaksanjel.com.np" target="_blank">janaksanjel.com.np</a></span>
-      </div>
-    </header>
+<!-- Sound toggle -->
+<button class="sound-btn" id="sound-toggle" title="Toggle sound">🔊</button>
 
-    <!-- ── PROFILE ─────────────────────────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Foreword</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-      <p class="profile-text" style="margin-top:12px;">
-        A dedicated Full Stack Developer with hands-on experience building production-ready web applications across government, recruitment, and hospitality sectors. Completed a Bachelor of Computer Application with a CGPA of 3.19 and currently working at NIRC, Kathmandu, where multiple client-facing systems have been shipped using ReactJS, Django, Java and MySQL. Writing clean, maintainable code, taking ownership of features end-to-end, and thriving in collaborative team environments.
-      </p>
-    </section>
+<!-- Book scene -->
+<div class="book-scene" id="book-scene">
 
-    <!-- ── EXPERIENCE ──────────────────────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Chapter I &nbsp;·&nbsp; Professional Experience</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-      <div style="margin-top:14px;" class="exp-entry">
-        <div class="exp-title">Full Stack Developer</div>
-        <div class="exp-company">NIRC — National Incubation &amp; Research Center, Kathmandu</div>
-        <div class="exp-date">December 2024 – Present</div>
-        <ul class="exp-bullets">
-          <li>Designed and delivered full-stack features for multiple live client projects, from database schema to responsive UI.</li>
-          <li>Worked directly with clients to translate requirements into technical solutions, reducing feedback cycles.</li>
-          <li>Maintained clean REST API contracts between Django backends and ReactJS frontends across 4 active products.</li>
-          <li>Contributed to a Grails/Java-based municipal government platform serving real users in local government offices.</li>
-        </ul>
-        <p style="font-size:0.76rem; color:var(--ink-light); font-style:italic; margin-top:6px;">
-          Stack: ReactJS · Django · Python · Java · Grails · MySQL · Node.js
-        </p>
-      </div>
-    </section>
+  <!-- Nav arrows -->
+  <button class="nav-btn nav-prev hidden" id="btn-prev" onclick="flipPage(-1)" title="Previous page">&#8249;</button>
+  <button class="nav-btn nav-next" id="btn-next" onclick="flipPage(1)" title="Next page">&#8250;</button>
 
-    <!-- ── PROJECTS ─────────────────────────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Chapter II &nbsp;·&nbsp; Selected Works</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-      <div class="projects-grid" style="margin-top:16px;">
+  <!-- Book -->
+  <div class="book" id="book">
+    <div class="flip-leaf" id="flip-leaf"></div>
 
-        <div class="project-card">
-          <div class="project-title">Training Management System</div>
-          <div class="project-stack">ReactJS · Django · MySQL</div>
-          <p class="project-desc">Complete institute management platform handling course scheduling, student enrolment, attendance and progress reporting. Designed DB schema and led frontend development.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">GWP – Palika Software</div>
-          <div class="project-stack">Java · Grails · HTML · CSS · MySQL</div>
-          <p class="project-desc">Digital operations suite for local government offices, enabling municipalities to manage citizen services, records and reporting in one unified system.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">Rakmina – Recruitment Platform</div>
-          <div class="project-stack">Django · Next.js · MySQL</div>
-          <p class="project-desc">Full-featured staffing portal for a Lithuania-based agency with applicant tracking, job listings and employer dashboards supporting 500+ successful placements.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">Gym Management System</div>
-          <div class="project-stack">ReactJS · Django · MySQL</div>
-          <p class="project-desc">All-in-one gym platform covering member registration, subscription billing, attendance check-in and staff management with a clean dashboard interface.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">CRM – Kiran Restaurant &amp; Dealership</div>
-          <div class="project-stack">ReactJS · Django · Python · MySQL</div>
-          <p class="project-desc">Multi-vertical CRM covering customer records, follow-ups and sales pipelines for both a restaurant and a vehicle dealership under one roof.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">OrderUP – Food Delivery App</div>
-          <div class="project-stack">ReactJS · Node.js</div>
-          <p class="project-desc">Online ordering system with dynamic menus, real-time cart and checkout flow, designed for small restaurants moving to digital ordering.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">Electronic Voting System</div>
-          <div class="project-stack">HTML · CSS · JavaScript</div>
-          <p class="project-desc">Secure, browser-based e-voting application for campus student elections with candidate registration, ballot casting and live result tallying.</p>
-        </div>
-
-        <div class="project-card">
-          <div class="project-title">E-Signature App</div>
-          <div class="project-stack">HTML · CSS · JavaScript</div>
-          <p class="project-desc">Lightweight digital signature tool enabling users to draw, type or upload signatures and embed them into documents — all without any server dependency.</p>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── SKILLS + EDUCATION (two-col) ─────────── -->
-    <section class="section">
-      <hr class="rule-thick" />
-      <div class="ornament">✦</div>
-      <h2 class="section-head">Chapter III &nbsp;·&nbsp; Craft &amp; Learning</h2>
-      <div class="ornament">✦</div>
-      <hr class="rule-line" />
-
-      <div class="two-col" style="margin-top:18px;">
-
-        <!-- Skills -->
-        <div>
-          <p style="font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase; margin-bottom:12px;">Technical Skills</p>
-          <div class="skills-grid" style="grid-template-columns:1fr 1fr; text-align:left;">
-            <div class="skill-group">
-              <h4>Frontend</h4>
-              <p>ReactJS<br/>Next.js<br/>JavaScript ES6+<br/>HTML5 &amp; CSS3</p>
-            </div>
-            <div class="skill-group">
-              <h4>Backend</h4>
-              <p>Django (Python)<br/>Java · Grails<br/>Node.js<br/>REST APIs</p>
-            </div>
-            <div class="skill-group" style="margin-top:12px;">
-              <h4>Database</h4>
-              <p>MySQL<br/>Database Design</p>
-            </div>
-            <div class="skill-group" style="margin-top:12px;">
-              <h4>Tools</h4>
-              <p>Git &amp; GitHub<br/>Agile Workflow<br/>Responsive Design</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Education -->
-        <div style="border-left: 1px solid rgba(196,154,42,0.35); padding-left:24px;">
-          <p style="font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase; margin-bottom:12px;">Education</p>
-
-          <div class="edu-entry">
-            <div class="edu-degree">Bachelor of Computer Application</div>
-            <div class="edu-school">Jana Bhawana Campus, Chapagaun</div>
-            <div class="edu-detail">Completed 2025 · CGPA 3.19</div>
-          </div>
-          <hr class="rule-line" style="margin:10px 0;" />
-          <div class="edu-entry">
-            <div class="edu-degree">+2 Science</div>
-            <div class="edu-school">Advance Academy College</div>
-            <div class="edu-detail">Passed 2077 BS · GPA 2.97</div>
-          </div>
-          <hr class="rule-line" style="margin:10px 0;" />
-          <div class="edu-entry">
-            <div class="edu-degree">School Leaving Certificate</div>
-            <div class="edu-school">Bidhyadhishwari Secondary School</div>
-            <div class="edu-detail">Passed 2073 BS · GPA 3.15</div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ── COLOPHON / FOOTER ───────────────────── -->
-    <div class="colophon">
-      <hr class="rule-thick" />
-      <div class="ornament">✦ &nbsp;✦ &nbsp;✦</div>
-      <p>PRINTED &amp; BOUND BY JANAK SANJEL · LALITPUR, NEPAL · MMXXV</p>
-      <p style="margin-top:4px; color:var(--ink-light);">janaksanjel.com.np</p>
+    <!-- Spine -->
+    <div class="spine" id="spine">
+      <div class="spine-ornament">✦</div>
+      <div class="spine-text" id="spine-label">Janak Sanjel · Full Stack Developer</div>
+      <div class="spine-ornament">✦</div>
     </div>
+    <div class="gutter"></div>
 
-  </div><!-- .page -->
-</div><!-- .book -->
+    <!-- Page content wrapper -->
+    <div class="page" id="page-main">
+      <div class="page-curl" id="page-curl" onclick="flipPage(1)" title="Turn page"></div>
+      <span class="folio" id="folio">— i —</span>
+
+      <!-- ═══ PAGE 1 CONTENT ═══ -->
+      <div class="page-content active" id="pg1">
+
+        <header class="header">
+          <p class="header-label">Curriculum Vitæ</p>
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament">✦ &nbsp; ✦ &nbsp; ✦</span></div>
+          <h1 class="header-name"><span>Janak</span> Sanjel</h1>
+          <p class="header-title">Full Stack Developer</p>
+          <div class="div-wrap" style="margin-top:10px"><span class="div-ornament" style="letter-spacing:.5em">— ✧ —</span></div>
+          <hr class="div-rule"/>
+          <nav class="contacts">
+            <span class="contact-item">✉︎&thinsp;<a href="mailto:janaksanjel12@gmail.com">janaksanjel12@gmail.com</a></span>
+            <span class="c-dot"></span>
+            <span class="contact-item">☏&thinsp;+977 984 074 8285</span>
+            <span class="c-dot"></span>
+            <span class="contact-item">⌖&thinsp;Godawari-11, Lalitpur, Nepal</span>
+            <span class="c-dot"></span>
+            <span class="contact-item"><a href="https://github.com/janaksanjel" target="_blank">github.com/janaksanjel</a></span>
+            <span class="c-dot"></span>
+            <span class="contact-item"><a href="https://janaksanjel.com.np" target="_blank">janaksanjel.com.np</a></span>
+          </nav>
+        </header>
+
+        <section class="section">
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <h2 class="section-title">Foreword</h2>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <hr class="div-rule"/>
+          <p class="profile" style="margin-top:12px">A dedicated Full Stack Developer with hands-on experience building production-ready web applications across government, recruitment, and hospitality sectors. Completed a Bachelor of Computer Application with a CGPA of 3.19 and currently working at NIRC, Kathmandu, where multiple client-facing systems have been shipped using ReactJS, Django, Java and MySQL. Writing clean, maintainable code, taking ownership of features end-to-end, and thriving in collaborative team environments.</p>
+        </section>
+
+        <section class="section">
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <h2 class="section-title">Chapter I &nbsp;·&nbsp; Professional Experience</h2>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <hr class="div-rule"/>
+          <div class="exp" style="margin-top:14px">
+            <div class="exp-role">Full Stack Developer</div>
+            <div class="exp-org">NIRC — National Incubation &amp; Research Center, Kathmandu</div>
+            <div class="exp-period">December 2024 – Present</div>
+            <ul class="bullets">
+              <li>Designed and delivered full-stack features for multiple live client projects, from database schema to responsive UI.</li>
+              <li>Worked directly with clients to translate requirements into technical solutions, reducing feedback cycles.</li>
+              <li>Maintained clean REST API contracts between Django backends and ReactJS frontends across 4 active products.</li>
+              <li>Contributed to a Grails/Java-based municipal government platform serving real users in local government offices.</li>
+            </ul>
+            <p class="stack-tag">ReactJS · Django · Python · Java · Grails · MySQL · Node.js</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <h2 class="section-title">Chapter II &nbsp;·&nbsp; Selected Works</h2>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <hr class="div-rule"/>
+          <div class="proj-grid">
+            <div class="proj"><div class="proj-name">Training Management System</div><div class="proj-tech">ReactJS · Django · MySQL</div><p class="proj-desc">Complete institute management platform handling course scheduling, student enrolment, attendance and progress reporting.</p></div>
+            <div class="proj"><div class="proj-name">GWP – Palika Software</div><div class="proj-tech">Java · Grails · HTML · CSS · MySQL</div><p class="proj-desc">Digital operations suite for local government offices enabling municipalities to manage citizen services and records.</p></div>
+            <div class="proj"><div class="proj-name">Rakmina – Recruitment Platform</div><div class="proj-tech">Django · Next.js · MySQL</div><p class="proj-desc">Full-featured staffing portal for a Lithuania-based agency supporting 500+ successful placements.</p></div>
+            <div class="proj"><div class="proj-name">Gym Management System</div><div class="proj-tech">ReactJS · Django · MySQL</div><p class="proj-desc">All-in-one gym platform covering member registration, subscription billing and attendance check-in.</p></div>
+            <div class="proj"><div class="proj-name">CRM – Kiran Restaurant &amp; Dealership</div><div class="proj-tech">ReactJS · Django · MySQL</div><p class="proj-desc">Multi-vertical CRM covering customer records, follow-ups and sales pipelines for restaurant and dealership.</p></div>
+            <div class="proj"><div class="proj-name">OrderUP – Food Delivery App</div><div class="proj-tech">ReactJS · Node.js</div><p class="proj-desc">Online ordering system with dynamic menus, real-time cart and checkout flow for small restaurants.</p></div>
+            <div class="proj"><div class="proj-name">Electronic Voting System</div><div class="proj-tech">HTML · CSS · JavaScript</div><p class="proj-desc">Secure browser-based e-voting app for campus student elections with live result tallying.</p></div>
+            <div class="proj"><div class="proj-name">E-Signature App</div><div class="proj-tech">HTML · CSS · JavaScript</div><p class="proj-desc">Lightweight digital signature tool — draw, type or upload signatures and embed into documents.</p></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <h2 class="section-title">Chapter III &nbsp;·&nbsp; Craft &amp; Learning</h2>
+          <div class="div-wrap"><span class="div-ornament">✦</span></div>
+          <hr class="div-rule"/>
+          <div class="cols">
+            <div>
+              <p style="font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.28em;color:var(--red);text-transform:uppercase;margin:4px 0 2px">Technical Skills</p>
+              <hr class="div-rule" style="margin-bottom:10px"/>
+              <div class="skill-grid">
+                <div class="skill-cat"><div class="skill-cat-name">Frontend</div><div class="skill-cat-items">ReactJS<br/>Next.js<br/>JavaScript ES6+<br/>HTML5 &amp; CSS3</div></div>
+                <div class="skill-cat"><div class="skill-cat-name">Backend</div><div class="skill-cat-items">Django (Python)<br/>Java · Grails<br/>Node.js<br/>REST APIs</div></div>
+                <div class="skill-cat"><div class="skill-cat-name">Database</div><div class="skill-cat-items">MySQL<br/>Database Design</div></div>
+                <div class="skill-cat"><div class="skill-cat-name">Tools</div><div class="skill-cat-items">Git &amp; GitHub<br/>Agile Workflow<br/>Responsive Design</div></div>
+              </div>
+            </div>
+            <div class="col-rule">
+              <p style="font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.28em;color:var(--red);text-transform:uppercase;margin:4px 0 2px">Education</p>
+              <hr class="div-rule" style="margin-bottom:12px"/>
+              <div class="edu"><div class="edu-degree">Bachelor of Computer Application</div><div class="edu-school">Jana Bhawana Campus, Chapagaun</div><div class="edu-detail">Completed 2025 &nbsp;·&nbsp; CGPA 3.19</div></div>
+              <hr class="edu-divider"/>
+              <div class="edu"><div class="edu-degree">+2 Science</div><div class="edu-school">Advance Academy College</div><div class="edu-detail">Passed 2077 BS &nbsp;·&nbsp; GPA 2.97</div></div>
+              <hr class="edu-divider"/>
+              <div class="edu"><div class="edu-degree">School Leaving Certificate</div><div class="edu-school">Bidhyadhishwari Secondary School</div><div class="edu-detail">Passed 2073 BS &nbsp;·&nbsp; GPA 3.15</div></div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="colophon">
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament" style="letter-spacing:.9em">✦&nbsp;&nbsp;✦&nbsp;&nbsp;✦</span></div>
+          <hr class="div-rule"/>
+          <p class="colophon-text">Printed &amp; Bound by Janak Sanjel &nbsp;·&nbsp; Lalitpur, Nepal &nbsp;·&nbsp; MMXXV</p>
+          <p class="colophon-text" style="margin-top:4px;opacity:.6">janaksanjel.com.np</p>
+        </footer>
+      </div><!-- /pg1 -->
+
+      <!-- ═══ PAGE 2 CONTENT ═══ -->
+      <div class="page-content" id="pg2">
+        <div style="text-align:center;padding-bottom:16px">
+          <p class="header-label" style="margin-bottom:12px">The Artisan's Workshop</p>
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament">✦ &nbsp; ✦ &nbsp; ✦</span></div>
+          <h2 class="p2-title"><span>Open</span> Canvas</h2>
+          <p class="p2-subtitle">Draw &nbsp;·&nbsp; Paint &nbsp;·&nbsp; Preserve</p>
+          <div class="div-wrap" style="margin-top:10px"><span class="div-ornament" style="letter-spacing:.5em">— ✧ —</span></div>
+          <hr class="div-rule"/>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="tool-group">
+            <span class="tool-label">Tool</span>
+            <button class="mode-btn active" id="btn-pen" title="Pen" onclick="setTool('pen')">✒</button>
+            <button class="mode-btn" id="btn-brush" title="Soft Brush" onclick="setTool('brush')">🖌</button>
+            <button class="mode-btn" id="btn-callig" title="Calligraphy" onclick="setTool('callig')">𝒞</button>
+            <button class="mode-btn" id="btn-eraser" title="Eraser" onclick="setTool('eraser')">◻</button>
+          </div>
+          <div class="tool-group">
+            <span class="tool-label">Ink</span>
+            <div class="swatch-row" id="swatches">
+              <button class="swatch active" style="background:#160f05" data-color="#160f05" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#7a1515" data-color="#7a1515" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#b8922a" data-color="#b8922a" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#2e6b3e" data-color="#2e6b3e" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#1c3a6b" data-color="#1c3a6b" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#6b2e5c" data-color="#6b2e5c" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#c07840" data-color="#c07840" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#8b8b8b" data-color="#8b8b8b" onclick="setColor(this)"></button>
+              <button class="swatch" style="background:#f7f0e3" data-color="#f7f0e3" onclick="setColor(this)"></button>
+              <input type="color" id="custom-color" value="#160f05" title="Custom" onchange="setCustomColor(this.value)"/>
+            </div>
+          </div>
+          <div class="tool-group">
+            <span class="tool-label">Size</span>
+            <input type="range" id="brush-size" min="1" max="60" value="4" oninput="updateSize(this.value)"/>
+            <span id="size-label" style="font-family:'Cinzel',serif;font-size:.55rem;color:var(--ink-4);min-width:18px">4</span>
+          </div>
+          <div class="tool-group">
+            <span class="tool-label">Opacity</span>
+            <input type="range" id="brush-opacity" min="5" max="100" value="100" oninput="updateOpacity(this.value)"/>
+            <span id="opacity-label" style="font-family:'Cinzel',serif;font-size:.55rem;color:var(--ink-4);min-width:28px">100%</span>
+          </div>
+          <div class="tool-group">
+            <button class="act-btn" onclick="undoLast()">↩ Undo</button>
+            <button class="act-btn" onclick="clearCanvas()">✕ Clear</button>
+            <button class="act-btn save" onclick="saveCanvas()">⬇ Save</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="draw-canvas"></canvas>
+        </div>
+
+        <div class="status-bar">
+          <span class="status-text" id="status-msg">Begin thy work upon the page…</span>
+          <svg width="28" height="28" viewBox="0 0 28 28"><circle id="prev-circle" cx="14" cy="14" r="4" fill="#160f05"/></svg>
+        </div>
+
+        <footer class="colophon" style="margin-top:14px">
+          <hr class="div-rule double"/>
+          <div class="div-wrap"><span class="div-ornament" style="letter-spacing:.9em">✦&nbsp;&nbsp;✦&nbsp;&nbsp;✦</span></div>
+          <hr class="div-rule"/>
+          <p class="colophon-text">All artwork saved locally to your device &nbsp;·&nbsp; No data leaves this page</p>
+        </footer>
+      </div><!-- /pg2 -->
+
+    </div><!-- .page -->
+  </div><!-- .book -->
+
+</div><!-- .book-scene -->
+
+<div class="book-glow"></div>
+
+<!-- Page indicators -->
+<div class="page-indicator">
+  <div class="pip active" onclick="goToPage(0)" title="Page i"></div>
+  <div class="pip" onclick="goToPage(1)" title="Page ii"></div>
+</div>
+
+<p class="swipe-hint" id="swipe-hint">Swipe or click ›  to turn the page</p>
+
+<script>
+/* ══════════════════════════════════════════════
+   SOUND ENGINE  (Web Audio API — no network)
+══════════════════════════════════════════════ */
+let audioCtx = null;
+let soundOn = true;
+
+function getAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playPageTurn(){
+  if(!soundOn) return;
+  try{
+    const ac = getAudio();
+    const dur = 0.55;
+    // Layered: noise swoosh + paper crinkle tones
+    const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<data.length;i++){
+      const t = i / ac.sampleRate;
+      const env = Math.exp(-t * 7) * (1 - Math.exp(-t * 80));
+      // white noise base
+      const noise = (Math.random()*2-1);
+      // paper rustle harmonics
+      const rustle = Math.sin(2*Math.PI*320*t)*0.18 + Math.sin(2*Math.PI*640*t)*0.08 + Math.sin(2*Math.PI*180*t)*0.12;
+      data[i] = (noise*0.55 + rustle) * env * 0.38;
+    }
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    // High-pass to make it crisp
+    const hp = ac.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 180;
+    // Slight reverb convolver omitted for perf — just short delay
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(1,ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    src.connect(hp); hp.connect(gain); gain.connect(ac.destination);
+    src.start();
+    src.stop(ac.currentTime + dur);
+
+    // Second micro-crinkle at 120ms
+    setTimeout(()=>{
+      try{
+        const b2 = ac.createBuffer(1, ac.sampleRate*0.2, ac.sampleRate);
+        const d2 = b2.getChannelData(0);
+        for(let i=0;i<d2.length;i++){
+          const t=i/ac.sampleRate;
+          d2[i]=(Math.random()*2-1)*Math.exp(-t*18)*0.22;
+        }
+        const s2=ac.createBufferSource(); s2.buffer=b2;
+        const g2=ac.createGain(); g2.gain.setValueAtTime(0.5,ac.currentTime);
+        s2.connect(g2); g2.connect(ac.destination); s2.start(); s2.stop(ac.currentTime+0.2);
+      }catch(e){}
+    }, 120);
+  }catch(e){}
+}
+
+function playDrawSound(){
+  if(!soundOn) return;
+  try{
+    const ac = getAudio();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(900+Math.random()*200, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(300, ac.currentTime+0.06);
+    gain.gain.setValueAtTime(0.04, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+0.06);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(); osc.stop(ac.currentTime+0.06);
+  }catch(e){}
+}
+
+function playSaveSound(){
+  if(!soundOn) return;
+  try{
+    const ac = getAudio();
+    [523,659,784].forEach((f,i)=>{
+      const osc=ac.createOscillator();
+      const g=ac.createGain();
+      osc.type='sine'; osc.frequency.value=f;
+      const t=ac.currentTime+i*0.12;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.15,t+0.04);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+      osc.connect(g); g.connect(ac.destination);
+      osc.start(t); osc.stop(t+0.25);
+    });
+  }catch(e){}
+}
+
+document.getElementById('sound-toggle').addEventListener('click',()=>{
+  soundOn=!soundOn;
+  document.getElementById('sound-toggle').textContent = soundOn ? '🔊' : '🔇';
+});
+
+/* ══════════════════════════════════════════════
+   PAGE FLIP SYSTEM
+══════════════════════════════════════════════ */
+const pages    = ['pg1','pg2'];
+const folios   = ['— i —','— ii —'];
+const spines   = ['Janak Sanjel · Full Stack Developer','Paint Studio · Open Canvas'];
+let currentPage = 0;
+let flipping = false;
+
+function goToPage(idx){
+  if(idx === currentPage || flipping) return;
+  flipPage(idx > currentPage ? 1 : -1);
+}
+
+function flipPage(dir){
+  const next = currentPage + dir;
+  if(next < 0 || next >= pages.length || flipping) return;
+  flipping = true;
+  playPageTurn();
+
+  const book   = document.getElementById('book');
+  const leaf   = document.getElementById('flip-leaf');
+  const curl   = document.getElementById('page-curl');
+
+  // Trigger animations
+  book.classList.add(dir > 0 ? 'flip-forward' : 'flip-back');
+  leaf.classList.add('animating');
+
+  const dur = 900;
+  // At midpoint swap content
+  setTimeout(()=>{
+    document.getElementById(pages[currentPage]).classList.remove('active');
+    currentPage = next;
+    document.getElementById(pages[currentPage]).classList.add('active');
+    document.getElementById('folio').textContent = folios[currentPage];
+    document.getElementById('spine-label').textContent = spines[currentPage];
+
+    // update nav arrows
+    document.getElementById('btn-prev').classList.toggle('hidden', currentPage === 0);
+    document.getElementById('btn-next').classList.toggle('hidden', currentPage === pages.length-1);
+
+    // update curl — hide on last page
+    curl.style.display = currentPage === pages.length-1 ? 'none' : 'block';
+
+    // update pips
+    document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('active',i===currentPage));
+
+    // init canvas on page 2
+    if(currentPage === 1) setTimeout(initCanvas, 50);
+  }, dur/2);
+
+  setTimeout(()=>{
+    book.classList.remove('flip-forward','flip-back');
+    leaf.classList.remove('animating');
+    flipping = false;
+  }, dur + 50);
+}
+
+/* ══════════════════════════════════════════════
+   SWIPE / KEYBOARD / WHEEL
+══════════════════════════════════════════════ */
+let touchStartX = 0, touchStartY = 0;
+const scene = document.getElementById('book-scene');
+
+scene.addEventListener('touchstart', e=>{
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+
+scene.addEventListener('touchend', e=>{
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50){
+    flipPage(dx < 0 ? 1 : -1);
+  }
+}, {passive:true});
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='PageDown') flipPage(1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp') flipPage(-1);
+});
+
+// Wheel left/right only
+scene.addEventListener('wheel', e=>{
+  if(Math.abs(e.deltaX) > 30 && Math.abs(e.deltaX) > Math.abs(e.deltaY)){
+    flipPage(e.deltaX > 0 ? 1 : -1);
+  }
+},{passive:true});
+
+/* ══════════════════════════════════════════════
+   CANVAS / PAINT
+══════════════════════════════════════════════ */
+let canvasReady = false;
+let canvas, ctx, wrap;
+let tool = 'pen', color = '#160f05', size = 4, opacity = 1;
+let painting = false, lastX = 0, lastY = 0;
+let undoStack = [];
+const MAX_UNDO = 30;
+let drawSoundTimer = null;
+
+function initCanvas(){
+  if(canvasReady) return;
+  canvas = document.getElementById('draw-canvas');
+  ctx = canvas.getContext('2d');
+  wrap = document.getElementById('canvas-wrap');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive:false});
+  canvas.addEventListener('touchmove', draw, {passive:false});
+  canvas.addEventListener('touchend', stopDraw);
+  canvasReady = true;
+  updatePreview();
+}
+
+function resizeCanvas(){
+  const W = wrap.clientWidth;
+  const H = Math.max(340, Math.round(W*0.5));
+  const img = canvas.width > 0 ? ctx.getImageData(0,0,canvas.width,canvas.height) : null;
+  canvas.width = W; canvas.height = H;
+  ctx.fillStyle='#f7f0e3'; ctx.fillRect(0,0,W,H);
+  if(img && img.width>0) ctx.putImageData(img,0,0);
+}
+
+function snapshot(){
+  undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+  if(undoStack.length>MAX_UNDO) undoStack.shift();
+}
+
+function getPos(e){
+  const r=canvas.getBoundingClientRect();
+  const s=e.touches?e.touches[0]:e;
+  return [s.clientX-r.left, s.clientY-r.top];
+}
+
+function applyStyle(x0,y0,x1,y1){
+  ctx.globalAlpha=opacity; ctx.lineCap='round'; ctx.lineJoin='round';
+  if(tool==='eraser'){ctx.globalCompositeOperation='source-over';ctx.strokeStyle='#f7f0e3';ctx.lineWidth=size*2.5;ctx.shadowBlur=0;}
+  else if(tool==='pen'){ctx.globalCompositeOperation='source-over';ctx.strokeStyle=color;ctx.lineWidth=size;ctx.shadowBlur=0;}
+  else if(tool==='brush'){ctx.globalCompositeOperation='source-over';ctx.strokeStyle=color;ctx.lineWidth=size*1.8;ctx.shadowBlur=size*1.2;ctx.shadowColor=color;}
+  else if(tool==='callig'){ctx.globalCompositeOperation='source-over';ctx.strokeStyle=color;const dx=x1-x0,dy=y1-y0,a=Math.atan2(dy,dx);ctx.lineWidth=size*(1+1.5*Math.abs(Math.sin(a)));ctx.shadowBlur=0;}
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  ctx.shadowBlur=0; ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+}
+
+function startDraw(e){
+  e.preventDefault(); snapshot(); painting=true;
+  [lastX,lastY]=getPos(e); setStatus('Drawing…');
+  // throttled draw sound
+  drawSoundTimer = setInterval(playDrawSound, 80);
+}
+function draw(e){
+  if(!painting) return; e.preventDefault();
+  const [x,y]=getPos(e); applyStyle(lastX,lastY,x,y); lastX=x; lastY=y;
+}
+function stopDraw(){
+  painting=false; ctx.shadowBlur=0;
+  clearInterval(drawSoundTimer);
+  setStatus('Stroke complete — continue or save thy work.');
+}
+
+function setTool(t){
+  tool=t;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+t).classList.add('active');
+  canvas.style.cursor=t==='eraser'?'cell':'crosshair';
+  setStatus(t==='eraser'?'Eraser selected.':'Tool changed — begin thy stroke.');
+}
+function setColor(el){
+  color=el.dataset.color;
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active'); updatePreview();
+}
+function setCustomColor(val){ color=val; document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); updatePreview(); }
+function updateSize(v){ size=parseInt(v); document.getElementById('size-label').textContent=v; updatePreview(); }
+function updateOpacity(v){ opacity=v/100; document.getElementById('opacity-label').textContent=v+'%'; updatePreview(); }
+function updatePreview(){
+  if(!document.getElementById('prev-circle')) return;
+  const c=document.getElementById('prev-circle');
+  c.setAttribute('r',Math.min(Math.max(size/2,2),13));
+  c.setAttribute('fill',tool==='eraser'?'#ccc':color);
+  c.setAttribute('opacity',opacity);
+}
+function undoLast(){
+  if(!canvas||!undoStack.length){setStatus('Nothing to undo.');return;}
+  ctx.putImageData(undoStack.pop(),0,0); setStatus('Stroke undone.');
+}
+function clearCanvas(){
+  if(!canvas) return; snapshot();
+  ctx.fillStyle='#f7f0e3'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  setStatus('Canvas cleared — a fresh page awaits thee.');
+}
+function saveCanvas(){
+  if(!canvas) return;
+  const link=document.createElement('a');
+  const ts=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  link.download='janak-canvas-'+ts+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  playSaveSound();
+  setStatus('✦ Painting saved — '+link.download);
+}
+function setStatus(msg){ const el=document.getElementById('status-msg'); if(el) el.textContent=msg; }
+</script>
 </body>
 </html>
